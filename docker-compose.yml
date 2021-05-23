@@ -1,0 +1,42 @@
+version: "3"
+
+services:
+  db:
+    image: mysql
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_USER=djangouser
+      - MYSQL_PASSWORD=p@sSword123
+      - MYSQL_DATABASE=kindergartenExternal
+    volumes:
+      - dj_mysql_data:/var/lib/mysql
+  django:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+    - ./kindergartent/kindergarten/.env
+    links:
+      - "db:database"
+    ports:
+      - "8000:8000"
+    volumes:
+      - static_volume:/app/static
+    depends_on:
+      - db
+  nginx:
+    image: nginx:latest
+    volumes:
+      - ./assets/nginx/nginx.http.config:/etc/nginx/nginx.conf
+      - static_volume:/app/static
+    links:
+      - "django:django"
+    ports:
+      - "80:80"
+    depends_on:
+      - django
+
+volumes:
+  static_volume:
+  dj_mysql_data:
