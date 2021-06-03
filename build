@@ -1,0 +1,4 @@
+docker build -t kindergarten-internal -f Dockerfile .
+docker build -t kindergarten-db -f sql.Dockerfile
+docker build -t kindergarten-external .
+docker build -t kindergarten-nginx -f nginx.Dockerfile .

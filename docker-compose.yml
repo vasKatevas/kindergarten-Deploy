@@ -1,42 +1,64 @@
-version: "3"
+version: "3.6"
 
 services:
-  db:
-    image: mysql
+  database:
+    image: kindergarten-db
+    container_name: database
+    volumes:
+      - int_mysql_data:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_HOST: '172.19.0.3' #https://github.com/docker-library/mysql/issues/275
     ports:
       - "3306:3306"
-    environment:
-      - MYSQL_USER=djangouser
-      - MYSQL_PASSWORD=p@sSword123
-      - MYSQL_DATABASE=kindergartenExternal
-    volumes:
-      - dj_mysql_data:/var/lib/mysql
+
   django:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    env_file:
-    - ./kindergartent/kindergarten/.env
-    links:
-      - "db:database"
+    image:
+      kindergarten-external
+    environment:
+      - SECRET_KEY=u8@0#9)sc9j=)0_nf(x%(0sz#daqv_rk%!^d%&*uyt5mp%@&v-
+      - DATABASE_URL=mysql://hbstudent:p@ssword123@database:3306/kindergarten
+      - WAIT_HOSTS=database:3306
+      - WAIT_HOSTS_TIMEOUT=300
+      - WAIT_SLEEP_INTERVAL=30
+      - WAIT_HOST_CONNECT_TIMEOUT=30
+      - INTERNAL_SYSTEM_IP=http://internal:8080
     ports:
       - "8000:8000"
     volumes:
       - static_volume:/app/static
     depends_on:
-      - db
+      - database
+    entrypoint: sh -c "/wait && ./app.sh"
+  internal:
+    image: kindergarten-internal
+    ports:
+      - "8080:8080"
+    depends_on:
+      - database
+    command: sh -c "/wait && java -jar app.jar"
+    environment:
+      - WAIT_HOSTS=database:3306
+      - WAIT_HOSTS_TIMEOUT=300
+      - WAIT_SLEEP_INTERVAL=30
+      - WAIT_HOST_CONNECT_TIMEOUT=30
+      - SPRING_DATASOURCE_URL=jdbc:mysql://database:3306/kindergarten?useSSL=false&useUnicode=true&connectionCollation=utf8_general_ci&characterSetResults=utf8&characterEncoding=utf-8
+      - SPRING_DATASOURCE_USERNAME=hbstudent
+      - SPRING_DATASOURCE_PASSWORD=p@ssword123
+
   nginx:
-    image: nginx:latest
+    image: kindergarten-nginx
     volumes:
-      - ./assets/nginx/nginx.http.config:/etc/nginx/nginx.conf
       - static_volume:/app/static
     links:
       - "django:django"
+      - "internal:internal"
     ports:
       - "80:80"
+      - "89:89"
     depends_on:
       - django
+      - internal
 
 volumes:
   static_volume:
-  dj_mysql_data:
+  int_mysql_data:
