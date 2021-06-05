@@ -1,0 +1,69 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+
+    - name: copy docker-compose
+      ansible.builtin.copy:
+        src: ../docker-compose.yml
+        dest: "{{workdir}}"
+
+    - name: copy nginx.Dockerfile
+      ansible.builtin.copy:
+        src: ../nginx.Dockerfile
+        dest: "{{workdir}}"
+
+    - name: copy nginx config
+      ansible.builtin.copy:
+        src: ../nginx.http.config
+        dest: "{{workdir}}"
+
+    - name: build nginx
+      docker_image:
+        name: kindergarten-nginx
+        build:
+          dockerfile: "{{workdir}}nginx.Dockerfile"
+          path: "{{workdir}}"
+        source: build
+        state: present
+
+    - name: build mysql
+      docker_image:
+        name: kindergarten-db
+        build:
+          dockerfile: "{{workdir}}{{internal}}sql.Dockerfile"
+          path: "{{workdir}}{{internal}}"
+        source: build
+        state: present
+
+    - name: build internal
+      shell: "cd {{workdir}}{{internal}} && ./mvnw package"
+
+    - name: build docker internal
+      shell: "cd {{workdir}}{{internal}} && docker build -t kindergarten-internal -f Dockerfile ."
+#     docker_image:
+#       name: kindergarten-internal
+#       build:
+#         dockerfile: "{{workdir}}{{internal}}"
+#         path: "{{workdir}}{{internal}}"
+#       source: build
+#       state: present
+
+    - name: build external
+      shell: "cd {{workdir}}{{external}} && docker build -t kindergarten-external . "
+#     docker_image:
+#       name: kindergarten-external
+#       build:
+#         dockerfile: "{{workdir}}{{external}}"
+#         path: "{{workdir}}{{external}}"
+#       source: build
+#       state: present
+
+   
+    - name: run compose
+      community.general.docker_compose:
+        project_src: "{{workdir}}"
+        build: yes
+
+
+

@@ -1,0 +1,25 @@
+---
+- hosts: webserver
+
+  vars:
+    github: "https://github.com/vasKatevas/"
+
+
+  tasks:
+
+    - name: clone internal
+      git:
+        repo: "{{github}}{{internal}}"
+        version: "main"
+        clone: yes
+        dest: "{{workdir}}/{{internal}}"
+      changed_when: true
+
+
+    - name: clone external
+      git:
+        repo: "{{github}}{{external}}"
+        version: "master"
+        clone: yes
+        dest: "{{workdir}}/{{external}}"
+      changed_when: true

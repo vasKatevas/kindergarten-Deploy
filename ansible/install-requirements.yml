@@ -1,0 +1,61 @@
+---
+- hosts: all
+  become: yes
+  become_user: root
+  vars:
+    pip_executable: pip3
+
+
+
+  tasks:
+  - name: Update APT package manager repositories cache
+    become: true
+    apt:
+      update_cache: yes
+  - name: Install Java using Ansible
+    become: true
+    apt:
+      name: "openjdk-11-jdk"
+      state: present
+  - name: Add universe repository for bionic
+    apt_repository:
+      repo: deb http://archive.ubuntu.com/ubuntu bionic universe
+      state: present
+  - name: install gnupg2
+    apt:
+      name: gnupg2
+      state: present
+      update_cache: true
+    when: ansible_distribution_release == 'bionic'
+
+  - include_role:
+      name: geerlingguy.docker
+  - include_role:
+      name: geerlingguy.pip
+  - name: 'add users to docker group'
+    user:
+      name: 'vagrant'
+      groups: 'docker'
+      append: 'yes'
+
+  - name: upgrade pip
+    pip: 
+      name: pip
+      state: latest
+
+  - name: pip  docker
+    pip: 
+      name: docker
+      state: latest
+
+  - name: pip docker-compose
+    pip: 
+      name: docker-compose
+      state: latest
+
+
+
+
+
+
+
