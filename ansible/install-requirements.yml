@@ -3,9 +3,9 @@
   become: yes
   become_user: root
   vars:
-    pip_executable: pip3
+    executable: pip3
 
-
+    # sudo apt install python3-setuptools
 
   tasks:
   - name: Update APT package manager repositories cache
@@ -40,16 +40,19 @@
 
   - name: upgrade pip
     pip: 
+      executable: pip3
       name: pip
       state: latest
 
   - name: pip  docker
     pip: 
+      executable: pip3
       name: docker
       state: latest
 
   - name: pip docker-compose
     pip: 
+      executable: pip3
       name: docker-compose
       state: latest
 
