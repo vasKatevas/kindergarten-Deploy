@@ -61,7 +61,7 @@
 
    
     - name: run compose
-      community.general.docker_compose:
+      docker_compose:
         project_src: "{{workdir}}"
         build: yes
 
