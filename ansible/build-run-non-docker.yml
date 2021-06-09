@@ -3,31 +3,93 @@
   become: yes
   tasks:
 
-  - name: build internal
-    shell: ./mvnw package
-    args:
-      chdir: "{{workdir}}{{internal}}"
-
-  - name: run internal
-    shell: nohup java -jar Internal-system-0.0.1-SNAPSHOT.jar &
-    args:
-      chdir: "{{workdir}}{{internal}}"
+    - name: build internal
+      shell: ./mvnw package
+      args:
+        chdir: "{{workdir}}{{internal}}"
 
 
-  - name: python 
-    shell: " echo \"alias python=python3\" >> .bashrc"
+
+    - name: python 
+      shell: " echo \"alias python=python3\" >> .bashrc"
 
 
-  - name: external
-    shell: |
-      pip3 install -r requirements.txt
-      cp kindergartent/kindergarten/.env.development kindergartent/kindergarten/.env
-    args:
-      chdir: "{{workdir}}{{external}}"
+    - name: external
+      shell: |
+        pip3 install -r requirements.txt
+        cp kindergartent/kindergarten/.env.development kindergartent/kindergarten/.env
+      args:
+        chdir: "{{workdir}}{{external}}"
 
-  - name: external run
-    shell: |
-      chmod +x app.sh
-      ./app.sh
-    args:
-      chdir: "{{workdir}}{{external}}kindergartent"
+    - name: copy nginx config
+      ansible.builtin.copy:
+        src: ../nginx.localhost.config
+        dest: /etc/nginx/nginx.conf
+
+
+    - name: edit database.sql part 1
+      command: "sed -i /GRANT/d {{workdir}}{{internal}}database.sql "
+
+    - name: edit database.sql part 2
+      command: "sed -i /DATABASE/d {{workdir}}{{internal}}database.sql"
+
+    - name: Import database
+      become: true
+      mysql_db:
+        state: import
+        name: all
+        target: "{{workdir}}{{internal}}database.sql"
+      notify: Restart mysql
+
+
+    - name: copy gunicorn service
+      template:
+        src: ../gunicorn.service.j2
+        dest: /etc/systemd/system/gunicorn.service
+      become: yes
+      become_user: root
+      notify: Restart Nginx
+
+
+    - name: copy gunicorn service
+      template:
+        src: ../gunicorn.service.j2
+        dest: /etc/systemd/system/gunicorn.service
+      become: yes
+      become_user: root
+      notify: Restart Nginx
+
+
+    - name: copy internal service
+      template:
+        src: ../internal.service.j2
+        dest: /etc/systemd/system/internal.service
+      become: yes
+      become_user: root
+      notify: Restart Nginx
+
+
+    - name: ensure gunicorn service started
+      service:
+        name: gunicorn
+        state: started
+        enabled: yes
+      become: yes
+
+    - name: ensure internal service started
+      service:
+        name: internal
+        state: started
+        enabled: yes
+      become: yes
+
+  handlers:
+    - name: Restart Nginx
+      service:
+        name: nginx
+        state: restarted
+    - name: Restart mysql
+      service:
+        name: mysql
+        state: restarted
+

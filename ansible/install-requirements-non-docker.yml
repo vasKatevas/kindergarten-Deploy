@@ -4,7 +4,6 @@
   vars_files:
     - vars/main.yml
 
-    # sudo apt install python3-setuptools
 
   tasks:
 
