@@ -1,0 +1,44 @@
+---
+- hosts: all
+  become: yes
+
+
+  tasks:
+    - name: copy config
+      ansible.builtin.copy:
+        src: ../nginx.localhost.config
+        dest: /etc/nginx/nginx.conf
+
+    - name: edit nginx config django
+      lineinfile:
+        dest: "/etc/nginx/nginx.conf"
+        regexp: "django"
+        line: "localhost"
+        state: present
+
+        
+#   - name: edit nginx config internal
+#     command: "sed -i s/internal/localhost/g /etc/nginx/nginx.conf"
+
+
+#   - name: edit nginx config external
+#     command: "sed -i s/external/localhost/g /etc/nginx/nginx.conf"
+
+    - name: edit database.sql part 1
+      command: "sed -i /GRANT/d {{workdir}}{{internal}}database.sql "
+
+    - name: edit database.sql part 2
+      command: "sed -i /DATABASE/d {{workdir}}{{internal}}database.sql"
+
+    - name: Import database
+      become: true
+      mysql_db:
+        state: import
+        name: all
+        target: "{{workdir}}{{internal}}database.sql"
+
+  handlers:
+    - name: Restart Nginx
+      service:
+        name: nginx
+        state: restarted

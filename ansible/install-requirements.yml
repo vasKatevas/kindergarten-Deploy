@@ -8,10 +8,18 @@
     # sudo apt install python3-setuptools
 
   tasks:
+
   - name: Update APT package manager repositories cache
     become: true
     apt:
       update_cache: yes
+
+  - name: install nginx
+    apt:
+      name: nginx
+      state: latest
+      update_cache: yes
+
   - name: Install Java using Ansible
     become: true
     apt:

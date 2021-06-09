@@ -1,0 +1,10 @@
+mysql_root_password: P@ssword123
+
+mysql_root_password: super-secure-password
+mysql_databases:
+    - name: kindergarten
+mysql_users:
+  - name: hbstudent
+    host: "localhost"
+    password: P@ssword123
+    priv: "kindergarten.*:ALL"

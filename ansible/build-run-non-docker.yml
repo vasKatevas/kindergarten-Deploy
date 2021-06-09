@@ -1,0 +1,33 @@
+---
+- hosts: all
+  become: yes
+  tasks:
+
+  - name: build internal
+    shell: ./mvnw package
+    args:
+      chdir: "{{workdir}}{{internal}}"
+
+  - name: run internal
+    shell: nohup java -jar Internal-system-0.0.1-SNAPSHOT.jar &
+    args:
+      chdir: "{{workdir}}{{internal}}"
+
+
+  - name: python 
+    shell: " echo \"alias python=python3\" >> .bashrc"
+
+
+  - name: external
+    shell: |
+      pip3 install -r requirements.txt
+      cp kindergartent/kindergarten/.env.development kindergartent/kindergarten/.env
+    args:
+      chdir: "{{workdir}}{{external}}"
+
+  - name: external run
+    shell: |
+      chmod +x app.sh
+      ./app.sh
+    args:
+      chdir: "{{workdir}}{{external}}kindergartent"

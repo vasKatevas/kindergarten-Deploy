@@ -36,6 +36,13 @@
         source: build
         state: present
 
+    - name: add ip in django ALLOWED_HOSTS
+      lineinfile:
+        dest: "{{workdir}}{{external}}kindergartent/kindergarten/settings.py"
+        regexp: "^ALLOWED_HOSTS ="
+        line: "ALLOWED_HOSTS = {'*'}"
+        state: present
+
     - name: build internal
       shell: "cd {{workdir}}{{internal}} && ./mvnw package"
 

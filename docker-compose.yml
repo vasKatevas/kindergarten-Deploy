@@ -28,6 +28,7 @@ services:
       - static_volume:/app/static
     depends_on:
       - database
+      - internal
     entrypoint: sh -c "/wait && ./app.sh"
   internal:
     image: kindergarten-internal
