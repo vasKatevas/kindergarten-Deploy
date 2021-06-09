@@ -4,25 +4,11 @@
 
 
   tasks:
-    - name: copy config
+    - name: copy nginx config
       ansible.builtin.copy:
         src: ../nginx.localhost.config
         dest: /etc/nginx/nginx.conf
 
-    - name: edit nginx config django
-      lineinfile:
-        dest: "/etc/nginx/nginx.conf"
-        regexp: "django"
-        line: "localhost"
-        state: present
-
-        
-#   - name: edit nginx config internal
-#     command: "sed -i s/internal/localhost/g /etc/nginx/nginx.conf"
-
-
-#   - name: edit nginx config external
-#     command: "sed -i s/external/localhost/g /etc/nginx/nginx.conf"
 
     - name: edit database.sql part 1
       command: "sed -i /GRANT/d {{workdir}}{{internal}}database.sql "
@@ -36,9 +22,47 @@
         state: import
         name: all
         target: "{{workdir}}{{internal}}database.sql"
+      notify: Restart mysql
+
+
+    - name: copy gunicorn service
+      template:
+        src: ../gunicorn.service.j2
+        dest: /etc/systemd/system/gunicorn.service
+      become: yes
+      become_user: root
+      notify: Restart Nginx
+
+
+    - name: copy internal service
+      template:
+        src: ../internal.service.j2
+        dest: /etc/systemd/system/internal.service
+      become: yes
+      become_user: root
+      notify: Restart Nginx
+
+
+    - name: ensure gunicorn service started
+      service: 
+        name: gunicorn
+        state: started
+        enabled: yes
+      become: yes
+
+    - name: ensure internal service started
+      service: 
+        name: internal
+        state: started
+        enabled: yes
+      become: yes
 
   handlers:
     - name: Restart Nginx
       service:
         name: nginx
+        state: restarted
+    - name: Restart mysql
+      service:
+        name: mysql
         state: restarted
