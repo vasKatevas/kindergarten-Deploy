@@ -7,11 +7,11 @@
     - name: stop gunicorn
       service:
         name: gunicorn
-        state: stoped
+        state: stopped
       become: yes
 
     - name: run tests
-      shell: "python manage.py test"
+      shell: "python3 manage.py test"
       args:
         chdir: "{{workdir}}{{external}}kindergartent"
 
