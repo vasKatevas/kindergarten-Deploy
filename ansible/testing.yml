@@ -1,0 +1,22 @@
+---
+
+- hosts: all
+  tasks:
+
+
+    - name: stop gunicorn
+      service:
+        name: gunicorn
+        state: stoped
+      become: yes
+
+    - name: run tests
+      shell: "python manage.py test"
+      args:
+        chdir: "{{workdir}}{{external}}kindergartent"
+
+    - name: start gunicorn
+      service:
+        name: gunicorn
+        state: started
+      become: yes
