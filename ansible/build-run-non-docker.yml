@@ -17,9 +17,18 @@
     - name: external
       shell: |
         pip3 install -r requirements.txt
-        cp kindergartent/kindergarten/.env.development kindergartent/kindergarten/.env
+        cp kindergartent/kindergarten/.env.example kindergartent/kindergarten/.env
       args:
         chdir: "{{workdir}}{{external}}"
+
+
+
+    - name: add ip in django ALLOWED_HOSTS
+      lineinfile:
+        dest: "{{workdir}}{{external}}kindergartent/kindergarten/settings.py"
+        regexp: "^ALLOWED_HOSTS ="
+        line: "ALLOWED_HOSTS = ['*']"
+        state: present
 
     - name: copy nginx config
       ansible.builtin.copy:
@@ -27,19 +36,20 @@
         dest: /etc/nginx/nginx.conf
 
 
+    - name: make migrations
+      shell: "python3 manage.py {{ item }}"
+      args:
+        chdir: "{{workdir}}{{external}}kindergartent"
+      with_items:
+        - makemigrations
+        - migrate
+
     - name: edit database.sql part 1
       command: "sed -i /GRANT/d {{workdir}}{{internal}}database.sql "
 
     - name: edit database.sql part 2
       command: "sed -i /DATABASE/d {{workdir}}{{internal}}database.sql"
 
-    - name: Import database
-      become: true
-      mysql_db:
-        state: import
-        name: all
-        target: "{{workdir}}{{internal}}database.sql"
-      notify: Restart mysql
 
 
     - name: copy gunicorn service
@@ -82,6 +92,15 @@
         state: started
         enabled: yes
       become: yes
+
+    - name: Import database
+      become: true
+      mysql_db:
+        state: import
+        name: all
+        target: "{{workdir}}{{internal}}database.sql"
+      notify: Restart mysql
+
 
   handlers:
     - name: Restart Nginx

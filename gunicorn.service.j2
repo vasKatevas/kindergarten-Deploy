@@ -10,7 +10,7 @@ Group=www-data
 # DynamicUser=yes
 # see http://0pointer.net/blog/dynamic-users-with-systemd.html
 WorkingDirectory={{workdir}}{{external}}kindergartent/
-ExecStart=/home/azureuser/.local/bin/gunicorn kindergarten.wsgi
+ExecStart=/usr/local/bin/gunicorn kindergarten.wsgi
 
 [Install]
 WantedBy=multi-user.target
