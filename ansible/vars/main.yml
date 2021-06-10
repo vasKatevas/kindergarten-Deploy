@@ -6,4 +6,4 @@ mysql_users:
   - name: hbstudent
     host: "localhost"
     password: P@ssword123
-    priv: "kindergarten.*:ALL"
+    priv: "kindergarten.*:ALL/test_kindergarten.*:ALL"
