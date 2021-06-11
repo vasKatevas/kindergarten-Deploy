@@ -1,0 +1,44 @@
+pipeline {
+	agent any
+		stages {
+			stage('get Deploy') {
+				steps {
+					git 'https://github.com/vasKatevas/kindergarten-Deploy'
+
+				}
+			}
+
+			stage('install server requiremnts'){
+				steps{
+					sh '''
+						ansible-galaxy install geerlingguy.docker
+						ansible-galaxy install geerlingguy.pip
+						'''
+				}
+			}
+
+			stage('install-requirements'){
+				steps{
+					sh '''
+						cd ansible/ && ansible-playbook -i hosts.yml -l app01 install-requirements.yml
+						'''
+				}
+			}
+			stage('clone-repos'){
+				steps{
+					sh '''
+						cd ansible/ && ansible-playbook -i hosts.yml -l app01 clone-repos.yml
+						'''
+				}
+			}
+			stage('build-run'){
+				steps{
+					sh '''
+						cd ansible/ && ansible-playbook -i hosts.yml -l app01 build-run.yml
+						'''
+				}
+			}
+
+
+		}
+}

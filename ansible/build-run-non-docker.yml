@@ -51,16 +51,6 @@
       command: "sed -i /DATABASE/d {{workdir}}{{internal}}database.sql"
 
 
-
-    - name: copy gunicorn service
-      template:
-        src: ../gunicorn.service.j2
-        dest: /etc/systemd/system/gunicorn.service
-      become: yes
-      become_user: root
-      notify: Restart Nginx
-
-
     - name: copy gunicorn service
       template:
         src: ../gunicorn.service.j2

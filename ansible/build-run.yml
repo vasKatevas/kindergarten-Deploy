@@ -49,23 +49,9 @@
 
     - name: build docker internal
       shell: "cd {{workdir}}{{internal}} && docker build -t kindergarten-internal -f Dockerfile ."
-#     docker_image:
-#       name: kindergarten-internal
-#       build:
-#         dockerfile: "{{workdir}}{{internal}}"
-#         path: "{{workdir}}{{internal}}"
-#       source: build
-#       state: present
 
     - name: build external
       shell: "cd {{workdir}}{{external}} && docker build -t kindergarten-external . "
-#     docker_image:
-#       name: kindergarten-external
-#       build:
-#         dockerfile: "{{workdir}}{{external}}"
-#         path: "{{workdir}}{{external}}"
-#       source: build
-#       state: present
 
    
     - name: run compose
