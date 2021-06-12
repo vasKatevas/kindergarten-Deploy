@@ -6,7 +6,12 @@
 
 
   tasks:
+    - name: check if internal exists
+      shell: "[ -d \"{{internal}}\" ] && cd {{internal}} && git restore ."
 
+    - name: check if internal exists
+      shell: "[ -d \"{{external}}\" ] && cd {{external}} && git restore ."
+    
     - name: clone internal
       git:
         repo: "{{github}}{{internal}}"
