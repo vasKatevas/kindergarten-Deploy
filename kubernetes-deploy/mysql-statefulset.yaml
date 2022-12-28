@@ -2,18 +2,20 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: mysql
+  labels:
+    app: spring
 spec:
   selector:
     matchLabels:
-      app: mysql
-      app.kubernetes.io/name: mysql
+      app: spring
+      tier: mysql
   serviceName: mysql
   replicas: 3
   template:
     metadata:
       labels:
-        app: mysql
-        app.kubernetes.io/name: mysql
+        app: spring
+        tier: mysql
     spec:
       initContainers:
       - name: init-mysql
@@ -129,7 +131,7 @@ spec:
             echo "Initializing replication from clone position"
             mysql -h 127.0.0.1 \
                   -e "$(<change_master_to.sql.in), \
-                          MASTER_HOST='mysql-0.mysql', \
+                          MASTER_HOST='spring-mysql-0.spring-mysql', \
                           MASTER_USER='root', \
                           MASTER_PASSWORD='', \
                           MASTER_CONNECT_RETRY=10; \

@@ -4,14 +4,15 @@ kind: Service
 metadata:
   name: mysql
   labels:
-    app: mysql
-    app.kubernetes.io/name: mysql
+    app: spring
 spec:
   ports:
   - name: mysql
     port: 3306
+    targetPort: 3306
   selector:
-    app: mysql
+    app: spring
+    tier: mysql
 ---
 # Client service for connecting to any MySQL instance for reads.
 # For writes, you must instead connect to the primary: mysql-0.mysql.
@@ -20,12 +21,12 @@ kind: Service
 metadata:
   name: mysql-read
   labels:
-    app: mysql
-    app.kubernetes.io/name: mysql
+    app: spring
     readonly: "true"
 spec:
   ports:
   - name: mysql
     port: 3306
   selector:
-    app: mysql
+    app: spring
+    tier: mysql

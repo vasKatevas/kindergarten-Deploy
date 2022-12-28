@@ -2,20 +2,22 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   creationTimestamp: null
+  name: spring
   labels:
-    app: demo
-  name: demo
+    app: spring
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: demo
+      app: spring
+      tier: frontend
   strategy: {}
   template:
     metadata:
       creationTimestamp: null
       labels:
-        app: demo
+        app: spring
+        tier: frontend
     spec:
       containers:
       - image: kindergarten-internal
@@ -24,7 +26,7 @@ spec:
         resources: {}
         env:
           - name: SPRING_DATASOURCE_URL
-            value: "jdbc:mysql://mysql:3306/kindergarten?useSSL=false&useUnicode=true&connectionCollation=utf8_general_ci&characterSetResults=utf8&characterEncoding=utf-8"
+            value: "jdbc:mysql://spring-mysql-0.spring-mysql:3306/kindergarten?useSSL=false&useUnicode=true&connectionCollation=utf8_general_ci&characterSetResults=utf8&characterEncoding=utf-8"
           - name: SPRING_DATASOURCE_USERNAME
             value: "hbstudent"
           - name: SPRING_DATASOURCE_PASSWORD
@@ -35,9 +37,9 @@ apiVersion: v1
 kind: Service
 metadata:
   creationTimestamp: null
+  name: spring
   labels:
-    app: demo
-  name: demo
+    app: spring
 spec:
   ports:
   - name: 8080-8080
@@ -45,7 +47,8 @@ spec:
     protocol: TCP
     targetPort: 8080
   selector:
-    app: demo
+    app: spring
+    tier: frontend
   type: ClusterIP
 status:
   loadBalancer: {}
